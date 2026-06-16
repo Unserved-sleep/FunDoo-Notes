@@ -41,17 +41,17 @@ A secure and scalable backend application inspired by Google Keep, built using *
 
 ## Tech Stack
 
-| Technology       | Purpose             |
-| ---------------- | ------------------- |
-| FastAPI          | Backend Framework   |
-| PostgreSQL       | Relational Database |
-| SQLAlchemy       | ORM                 |
-| Pydantic         | Data Validation     |
-| Passlib + bcrypt | Password Hashing    |
-| Python-JOSE      | JWT Authentication  |
-| Uvicorn          | ASGI Server         |
-| Swagger UI       | API Documentation   |
-| Postman          | API Testing         |
+| Technology       | Purpose                       |
+| ---------------- | ----------------------------- |
+| FastAPI          | Backend Framework             |
+| PostgreSQL       | Relational Database           |
+| SQLAlchemy       | ORM                           |
+| Pydantic         | Data Validation               |
+| Passlib + bcrypt | Password Hashing              |
+| Python-JOSE      | JWT Authentication            |
+| Uvicorn          | ASGI Server                   |
+| Swagger UI       | Interactive API Documentation |
+| ReDoc            | API Documentation             |
 
 ---
 
@@ -95,15 +95,17 @@ Fundoo-Notes/
 
 ## Database Design
 
-### User Table
+### Users Table
 
-| Column     | Type          |
-| ---------- | ------------- |
-| id         | Integer       |
-| first_name | String        |
-| last_name  | String        |
-| email      | String        |
-| password   | Hashed String |
+| Column     | Type            |
+| ---------- | --------------- |
+| id         | Integer         |
+| first_name | String          |
+| last_name  | String          |
+| email      | String (Unique) |
+| password   | Hashed String   |
+
+---
 
 ### Notes Table
 
@@ -116,16 +118,20 @@ Fundoo-Notes/
 | is_trashed  | Boolean     |
 | user_id     | Foreign Key |
 
+---
+
 ### Labels Table
 
-| Column | Type    |
-| ------ | ------- |
-| id     | Integer |
-| name   | String  |
+| Column | Type            |
+| ------ | --------------- |
+| id     | Integer         |
+| name   | String (Unique) |
+
+---
 
 ### Note Labels Table
 
-Used for many-to-many relationship between Notes and Labels.
+Used for the many-to-many relationship between Notes and Labels.
 
 | note_id | label_id |
 | ------- | -------- |
@@ -134,41 +140,11 @@ Used for many-to-many relationship between Notes and Labels.
 
 ## Relationships
 
-* One User can have Many Notes.
-* One Note can have Many Labels.
-* One Label can belong to Many Notes.
+* **One User** can have **Many Notes**
+* **One Note** can have **Many Labels**
+* **One Label** can belong to **Many Notes**
 
 ---
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/yourusername/Fundoo-Notes.git
-
-cd Fundoo-Notes
-```
-
-### Create Virtual Environment
-
-```bash
-python -m venv venv
-```
-
-Activate environment:
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux/Mac:
-
-```bash
-source venv/bin/activate
-```
 
 ### Install Dependencies
 
@@ -178,41 +154,43 @@ pip install -r requirements.txt
 
 ---
 
-## Environment Variables
+## Running the Application
 
-Create a `.env` file:
-
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/fundoo_db
-
-SECRET_KEY=your_secret_key
-
-ALGORITHM=HS256
-
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
----
-
-## Run Application
+Start the FastAPI development server:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Application will run on:
+The application will be available at:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Swagger Documentation:
+---
+
+## API Documentation
+
+### Swagger UI
+
+Interactive API documentation and testing:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-ReDoc Documentation:
+Features:
+
+* Interactive endpoint testing
+* JWT Authorization support
+* Request and response validation
+
+---
+
+### ReDoc
+
+Alternative API documentation interface:
 
 ```text
 http://127.0.0.1:8000/redoc
@@ -225,8 +203,8 @@ http://127.0.0.1:8000/redoc
 1. Register a new user.
 2. Login using email and password.
 3. Receive JWT access token.
-4. Authorize using Swagger or Postman.
-5. Access protected Notes and Labels APIs.
+4. Authorize using Swagger UI.
+5. Access protected Notes and Labels endpoints.
 
 ---
 
@@ -239,71 +217,48 @@ http://127.0.0.1:8000/redoc
 | POST   | `/users/`      | Register User |
 | POST   | `/users/login` | Login User    |
 
+---
+
 ### Users
 
-| Method | Endpoint      |
-| ------ | ------------- |
-| GET    | `/users/`     |
-| GET    | `/users/{id}` |
-| PUT    | `/users/{id}` |
-| DELETE | `/users/{id}` |
+| Method | Endpoint      | Description    |
+| ------ | ------------- | -------------- |
+| GET    | `/users/`     | Get All Users  |
+| GET    | `/users/{id}` | Get User by ID |
+| PUT    | `/users/{id}` | Update User    |
+| DELETE | `/users/{id}` | Delete User    |
+
+---
 
 ### Notes
 
-| Method | Endpoint              |
-| ------ | --------------------- |
-| POST   | `/notes/`             |
-| GET    | `/notes/`             |
-| GET    | `/notes/{id}`         |
-| PUT    | `/notes/{id}`         |
-| DELETE | `/notes/{id}`         |
-| PATCH  | `/notes/{id}/archive` |
-| PATCH  | `/notes/{id}/trash`   |
+| Method | Endpoint              | Description        |
+| ------ | --------------------- | ------------------ |
+| POST   | `/notes/`             | Create Note        |
+| GET    | `/notes/`             | Get User Notes     |
+| GET    | `/notes/{id}`         | Get Note by ID     |
+| PUT    | `/notes/{id}`         | Update Note        |
+| DELETE | `/notes/{id}`         | Delete Note        |
+| PATCH  | `/notes/{id}/archive` | Archive Note       |
+| PATCH  | `/notes/{id}/trash`   | Move Note to Trash |
+
+---
 
 ### Labels
 
-| Method | Endpoint                             |
-| ------ | ------------------------------------ |
-| POST   | `/labels/`                           |
-| GET    | `/labels/`                           |
-| DELETE | `/labels/{id}`                       |
-| POST   | `/labels/{label_id}/notes/{note_id}` |
-| DELETE | `/labels/{label_id}/notes/{note_id}` |
+| Method | Endpoint                             | Description            |
+| ------ | ------------------------------------ | ---------------------- |
+| POST   | `/labels/`                           | Create Label           |
+| GET    | `/labels/`                           | Get All Labels         |
+| DELETE | `/labels/{id}`                       | Delete Label           |
+| POST   | `/labels/{label_id}/notes/{note_id}` | Assign Label to Note   |
+| DELETE | `/labels/{label_id}/notes/{note_id}` | Remove Label from Note |
 
 ---
 
-## API Testing
+## Security Implementation
 
-The APIs can be tested using:
-
-* Swagger UI (`/docs`)
-* ReDoc (`/redoc`)
-* Postman Collections
-
----
-
-## Future Improvements
-
-* Alembic Database Migrations
-* Docker Support
-* Unit Testing with Pytest
-* Redis Caching
-* Email Verification
-* Password Reset Functionality
-* CI/CD Pipeline Integration
-
----
-
-## Author
-
-**Your Name**
-
-GitHub: https://github.com/yourusername
-
-LinkedIn: https://linkedin.com/in/yourprofile
-
----
-
-## License
-
-This project is licensed under the MIT License.
+* Passwords are securely hashed using **bcrypt** before storing in the database.
+* JWT tokens are generated after successful authentication.
+* Protected routes require a valid Bearer token.
+* Users can only access and modify their own notes.
